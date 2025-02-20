@@ -23,35 +23,38 @@
     <script src="https://tss.boost.ai/chatPanel/chatPanel.js"></script>
     <script>
         function resize(width, height, options = {}) {
-            let urlParams = new URLSearchParams(document.location.search);
-            const iframe_id = urlParams.get("floating_iframe_id");
+    let urlParams = new URLSearchParams(document.location.search);
+    const iframe_id = urlParams.get("floating_iframe_id");
 
-             if (!iframe_id) {
-                console.error("Iframe ID is not found in the URL parameters.");
-                return;
-            }
+    console.log(`Resize was called on iframe_id: ${iframe_id} with h:${height} w:${width} options:`, options);
+    let coupahost = urlParams.get("coupahost");
 
-            console.log(`Resize was called on iframe_id: ${iframe_id} with h:${height} w:${width} options:`, options);
-            const coupahost = urlParams.get("coupahost");
+    // Ensure coupahost has a valid value
+    if (!coupahost || !coupahost.startsWith("http")) {
+        console.error("Invalid coupahost:", coupahost);
+        return;
+    }
 
-            const postMessageOptions = {
-                action: "resize",
-                client_id: "5e2a0395-8258-456f-9c01-7f491529ca94",
-                iframe_id: iframe_id,
-                data: {
-                    height: height, // height in px
-                    width: width, // width in px
-                    initial: options.initial, // Set this to true at the time of page load, false otherwise
-                }
-            }
-
-            console.log({ postMessageOptions });
-
-            window.parent.postMessage(
-                postMessageOptions,
-                coupahost
-            );
+    const postMessageOptions = {
+        action: "resize",
+        client_id: "5e2a0395-8258-456f-9c01-7f491529ca94",
+        iframe_id: iframe_id,
+        data: {
+            height: height,
+            width: width,
+            initial: options.initial,
         }
+    };
+
+    console.log({ postMessageOptions });
+
+    try {
+        window.parent.postMessage(postMessageOptions, coupahost);
+    } catch (error) {
+        console.error("postMessage error:", error);
+    }
+}
+
 
         var config = {
             chatPanel: {
